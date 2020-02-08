@@ -1,11 +1,32 @@
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import fetch from "isomorphic-unfetch";
 import Layout from "../components/layout";
 import Masthead from "../components/masthead";
 import { siteURL } from "../helpers/siteurl";
-import { DateFormat } from "../helpers/dateformat";
+import { dateFormat } from "../helpers/dateformat";
 import { indexStyles } from "../styles/index-styles";
 
-function Index({ posts }) {
+function Index({ posts, tags }) {
+  const [selectedTag, updateSelectedTag] = useState(null);
+  const [sortedPosts, updateSortedPosts] = useState([]);
+
+  useEffect(() => {
+    if (!selectedTag) {
+      updateSortedPosts(posts);
+    } else {
+      updateSortedPosts(posts.filter(el => el.tags.includes(selectedTag)));
+    }
+  }, [selectedTag]);
+
+  const updateTag = tag => {
+    if (!selectedTag) {
+      updateSelectedTag(tag.id);
+    } else {
+      updateSelectedTag(null);
+    }
+  };
+
   return (
     <>
       <Layout>
@@ -13,23 +34,47 @@ function Index({ posts }) {
           <Masthead />
           <div className="posts">
             <main>
-              {posts.map(post => (
+              {sortedPosts.map(post => (
                 <div className="post" key={post.id}>
                   <h3>
-                    {/* TODO: Link here... */}
-                    {post.title.rendered}
+                    <Link
+                      href={{
+                        pathname: `/blog/${post.slug}`,
+                        query: { post }
+                      }}
+                      as={`/blog/${post.slug}`}
+                    >
+                      <a>{post.title.rendered}</a>
+                    </Link>
                   </h3>
-                  <small>{DateFormat(post.date)}</small>
+                  <small>{dateFormat(post.date)}</small>
                   <div
-                    // YOLO - living dangerously...!
+                    // YOLO
                     dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }}
                   ></div>
-                  {/* TODO: link here */}
-                  <a className="readmore slide">Read more ⟶</a>
+                  <Link href={`/blog/${post.slug}`}>
+                    <a className="readmore slide">Read more ⟶</a>
+                  </Link>
                 </div>
               ))}
             </main>
-            <aside>{/* TODO: add everything for aside */}</aside>
+            <aside>
+              <h2 className="tags-title">Tags</h2>
+              <div className="tags-list">
+                <ul>
+                  {tags.map(tag => (
+                    <li
+                      key={tag.id}
+                      className={tag.id === selectedTag ? "active" : ""}
+                      onClick={() => updateTag(tag)}
+                    >
+                      <a>{tag.name}</a>
+                      {tag.id === selectedTag ? <span> ✕</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </aside>
           </div>
         </div>
       </Layout>
@@ -39,6 +84,7 @@ function Index({ posts }) {
 }
 
 Index.getInitialProps = async ctx => {
+  // Get posts
   let posts = await fetch(
     `${siteURL}/wp-json/wp/v2/posts?page=1&per_page=20&_embed=1`
   );
@@ -56,7 +102,22 @@ Index.getInitialProps = async ctx => {
       content
     }));
 
-  return { posts };
+  // Get tags
+  let allTags = posts.reduce((acc, item) => {
+    return acc.concat(item.tags);
+  }, []);
+  allTags = allTags.join();
+
+  let tags = await fetch(
+    `${siteURL}/wp-json/wp/v2/tags?page=1&per_page=40&include=${allTags}`
+  ).then(res => res.json());
+
+  tags = tags.map(({ id, name }) => ({
+    id,
+    name
+  }));
+
+  return { posts, tags };
 };
 
 export default Index;
