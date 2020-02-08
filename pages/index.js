@@ -27,50 +27,46 @@ function Index() {
   };
 
   return (
-    <>
-      <Layout>
-        <div>
-          <Masthead />
-          <div className="posts">
-            <main>
-              {sortedPosts.map(post => (
-                <div className="post" key={post.id}>
-                  <h3>
-                    <a href={`/blog/${post.slug}`}>{post.title.rendered}</a>
-                  </h3>
-                  <small>{dateFormat(post.date)}</small>
-                  <div
-                    // YOLO
-                    dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }}
-                  ></div>
-                  <a href={`/blog/${post.slug}`} className="readmore slide">
-                    Read more ⟶
-                  </a>
-                </div>
+    <div>
+      <Masthead />
+      <div className="posts">
+        <main>
+          {sortedPosts.map(post => (
+            <div className="post" key={post.id}>
+              <h3>
+                <a href={`/blog/${post.slug}`}>{post.title.rendered}</a>
+              </h3>
+              <small>{dateFormat(post.date)}</small>
+              <div
+                // YOLO
+                dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }}
+              ></div>
+              <a href={`/blog/${post.slug}`} className="readmore slide">
+                Read more ⟶
+              </a>
+            </div>
+          ))}
+        </main>
+        <aside>
+          <h2 className="tags-title">Tags</h2>
+          <div className="tags-list">
+            <ul>
+              {tags.map(tag => (
+                <li
+                  key={tag.id}
+                  className={tag.id === selectedTag ? "active" : ""}
+                  onClick={() => updateTag(tag)}
+                >
+                  <a>{tag.name}</a>
+                  {tag.id === selectedTag ? <span> ✕</span> : null}
+                </li>
               ))}
-            </main>
-            <aside>
-              <h2 className="tags-title">Tags</h2>
-              <div className="tags-list">
-                <ul>
-                  {tags.map(tag => (
-                    <li
-                      key={tag.id}
-                      className={tag.id === selectedTag ? "active" : ""}
-                      onClick={() => updateTag(tag)}
-                    >
-                      <a>{tag.name}</a>
-                      {tag.id === selectedTag ? <span> ✕</span> : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </aside>
+            </ul>
           </div>
-        </div>
-      </Layout>
+        </aside>
+      </div>
       <style jsx>{indexStyles}</style>
-    </>
+    </div>
   );
 }
 

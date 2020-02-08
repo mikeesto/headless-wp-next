@@ -16,7 +16,11 @@ module.exports = {
     posts.forEach(post => {
       paths[`/blog/${post.slug}`] = {
         page: `/blog/[post]`,
-        query: post
+        query: {
+          title: post.title.rendered,
+          date: post.date,
+          content: post.content.rendered
+        }
       };
     });
     return paths;

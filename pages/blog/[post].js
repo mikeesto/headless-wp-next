@@ -1,9 +1,34 @@
-import { useRouter } from "next/router";
+import { dateFormat } from "../../helpers/dateformat";
 
-const Post = () => {
-  const router = useRouter();
+const Post = ({ title, date, content }) => {
+  return (
+    <main className="post individual">
+      <h1>{title}</h1>
+      <small className="date">{dateFormat(date)}</small>
+      <section dangerouslySetInnerHTML={{ __html: content }}></section>
+      <style jsx>{`
+        main.post {
+          margin: 60px auto 50px;
+          max-width: 800px;
+          padding: 0 30px 70px;
+        }
+        h1 {
+          color: black;
+          font-size: 40px;
+        }
+        section {
+          color: #444;
+        }
+        .date {
+          text-align: center;
+        }
+      `}</style>
+    </main>
+  );
+};
 
-  return <h1>{router.query.id}</h1>;
+Post.getInitialProps = async ctx => {
+  return ctx.query;
 };
 
 export default Post;

@@ -2,11 +2,14 @@ import App from "next/app";
 import fetch from "isomorphic-unfetch";
 import PostContext from "../context/posts";
 import { siteURL } from "../helpers/siteurl";
+import Layout from "../components/layout";
 
 const MyApp = ({ Component, pageProps, posts, tags }) => {
   return (
     <PostContext.Provider value={{ posts, tags }}>
-      <Component {...pageProps}></Component>
+      <Layout>
+        <Component {...pageProps}></Component>
+      </Layout>
     </PostContext.Provider>
   );
 };
