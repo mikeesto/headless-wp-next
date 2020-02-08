@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import fetch from "isomorphic-unfetch";
+import { useState, useEffect, useContext } from "react";
 import Layout from "../components/layout";
 import Masthead from "../components/masthead";
-import { siteURL } from "../helpers/siteurl";
 import { dateFormat } from "../helpers/dateformat";
 import { indexStyles } from "../styles/index-styles";
+import PostContext from "../context/posts";
 
-function Index({ posts, tags }) {
+function Index() {
+  const { posts, tags } = useContext(PostContext);
   const [selectedTag, updateSelectedTag] = useState(null);
   const [sortedPosts, updateSortedPosts] = useState([]);
 
@@ -37,24 +36,16 @@ function Index({ posts, tags }) {
               {sortedPosts.map(post => (
                 <div className="post" key={post.id}>
                   <h3>
-                    <Link
-                      href={{
-                        pathname: `/blog/${post.slug}`,
-                        query: { post }
-                      }}
-                      as={`/blog/${post.slug}`}
-                    >
-                      <a>{post.title.rendered}</a>
-                    </Link>
+                    <a href={`/blog/${post.slug}`}>{post.title.rendered}</a>
                   </h3>
                   <small>{dateFormat(post.date)}</small>
                   <div
                     // YOLO
                     dangerouslySetInnerHTML={{ __html: post.excerpt.rendered }}
                   ></div>
-                  <Link href={`/blog/${post.slug}`}>
-                    <a className="readmore slide">Read more ⟶</a>
-                  </Link>
+                  <a href={`/blog/${post.slug}`} className="readmore slide">
+                    Read more ⟶
+                  </a>
                 </div>
               ))}
             </main>
@@ -82,42 +73,5 @@ function Index({ posts, tags }) {
     </>
   );
 }
-
-Index.getInitialProps = async ctx => {
-  // Get posts
-  let posts = await fetch(
-    `${siteURL}/wp-json/wp/v2/posts?page=1&per_page=20&_embed=1`
-  );
-  const json = await posts.json();
-
-  posts = json
-    .filter(el => el.status === "publish")
-    .map(({ id, slug, title, excerpt, date, tags, content }) => ({
-      id,
-      slug,
-      title,
-      excerpt,
-      date,
-      tags,
-      content
-    }));
-
-  // Get tags
-  let allTags = posts.reduce((acc, item) => {
-    return acc.concat(item.tags);
-  }, []);
-  allTags = allTags.join();
-
-  let tags = await fetch(
-    `${siteURL}/wp-json/wp/v2/tags?page=1&per_page=40&include=${allTags}`
-  ).then(res => res.json());
-
-  tags = tags.map(({ id, name }) => ({
-    id,
-    name
-  }));
-
-  return { posts, tags };
-};
 
 export default Index;
