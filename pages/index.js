@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from "react";
-import Layout from "../components/layout";
 import Masthead from "../components/masthead";
 import { dateFormat } from "../helpers/dateformat";
 import { indexStyles } from "../styles/index-styles";

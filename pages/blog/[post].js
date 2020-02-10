@@ -27,8 +27,6 @@ const Post = ({ title, date, content }) => {
   );
 };
 
-Post.getInitialProps = async ctx => {
-  return ctx.query;
-};
+Post.getInitialProps = async ctx => ctx.query;
 
 export default Post;
